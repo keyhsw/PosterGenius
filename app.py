@@ -121,24 +121,24 @@ def main():
                     type='index', # pass index or value
                 )
 
-                samples = shuffle_examples(examples_dir_idx=2)
+                samples = shuffle_examples(examples_dir_idx=3)
                 collection_explore_examples2 = gr.Dataset(
-                    label='3D卡通风格  --  点击样例图，自动填充参数',
+                    label='中国刺绣风格  --  点击样例图，自动填充参数',
                     components=[gr.Image(visible=False)],
                     samples=[
-                        [os.path.join(examples_dir[2], x)] for x in samples
+                        [os.path.join(examples_dir[3], x)] for x in samples
                     ],
                     samples_per_page=8,
                     elem_id='examples2',
                     type='index', # pass index or value
                 )
 
-                samples = shuffle_examples(examples_dir_idx=3)
+                samples = shuffle_examples(examples_dir_idx=5)
                 collection_explore_examples3 = gr.Dataset(
-                    label='中国刺绣风格  --  点击样例图，自动填充参数',
+                    label='折纸工艺  --  点击样例图，自动填充参数',
                     components=[gr.Image(visible=False)],
                     samples=[
-                        [os.path.join(examples_dir[3], x)] for x in samples
+                        [os.path.join(examples_dir[5], x)] for x in samples
                     ],
                     samples_per_page=8,
                     elem_id='examples3',
@@ -157,12 +157,12 @@ def main():
                     type='index', # pass index or value
                 )
 
-                samples = shuffle_examples(examples_dir_idx=5)
+                samples = shuffle_examples(examples_dir_idx=2)
                 collection_explore_examples5 = gr.Dataset(
-                    label='折纸工艺  --  点击样例图，自动填充参数',
+                    label='3D卡通风格  --  点击样例图，自动填充参数',
                     components=[gr.Image(visible=False)],
                     samples=[
-                        [os.path.join(examples_dir[5], x)] for x in samples
+                        [os.path.join(examples_dir[2], x)] for x in samples
                     ],
                     samples_per_page=8,
                     elem_id='examples5',
@@ -241,24 +241,24 @@ def main():
                     type='index', # pass index or value
                 )
 
-                samples = shuffle_examples(examples_dir_idx=2)
+                samples = shuffle_examples(examples_dir_idx=3)
                 explore_examples2 = gr.Dataset(
-                    label='3D卡通风格  --  点击样例图，自动填充参数',
+                    label='中国刺绣风格  --  点击样例图，自动填充参数',
                     components=[gr.Image(visible=False)],
                     samples=[
-                        [os.path.join(examples_dir[2], x)] for x in samples
+                        [os.path.join(examples_dir[3], x)] for x in samples
                     ],
                     samples_per_page=8,
                     elem_id='examples2',
                     type='index', # pass index or value
                 )
 
-                samples = shuffle_examples(examples_dir_idx=3)
+                samples = shuffle_examples(examples_dir_idx=5)
                 explore_examples3 = gr.Dataset(
-                    label='中国刺绣风格  --  点击样例图，自动填充参数',
+                    label='折纸工艺  --  点击样例图，自动填充参数',
                     components=[gr.Image(visible=False)],
                     samples=[
-                        [os.path.join(examples_dir[3], x)] for x in samples
+                        [os.path.join(examples_dir[5], x)] for x in samples
                     ],
                     samples_per_page=8,
                     elem_id='examples3',
@@ -277,12 +277,12 @@ def main():
                     type='index', # pass index or value
                 )
 
-                samples = shuffle_examples(examples_dir_idx=5)
+                samples = shuffle_examples(examples_dir_idx=2)
                 explore_examples5 = gr.Dataset(
-                    label='折纸工艺  --  点击样例图，自动填充参数',
+                    label='3D卡通风格  --  点击样例图，自动填充参数',
                     components=[gr.Image(visible=False)],
                     samples=[
-                        [os.path.join(examples_dir[5], x)] for x in samples
+                        [os.path.join(examples_dir[2], x)] for x in samples
                     ],
                     samples_per_page=8,
                     elem_id='examples5',
