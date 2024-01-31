@@ -88,7 +88,7 @@ def main():
     block = gr.Blocks(
         css='style.css',
         theme=gr.themes.Soft()
-    ).queue(concurrency_count=50, api_open=False)
+    ).queue(concurrency_count=2, api_open=False)
     with block:
         with gr.Row():
             # gr.HTML('', elem_id='logo')
