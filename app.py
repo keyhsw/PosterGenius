@@ -92,7 +92,7 @@ def main():
     with block:
         with gr.Row():
             # gr.HTML('', elem_id='logo')
-            gr.HTML('<div id=title>创意海报生成</div>')
+            gr.HTML('<div id=title>PosterGenius - 创意海报生成</div>')
 
         with gr.Tabs() as tabs:
             collection_tab =gr.Tab(label="作品广场", elem_id='tab', id=0)
