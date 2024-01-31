@@ -1,0 +1,2 @@
+gradio==3.47.1
+dashscope
