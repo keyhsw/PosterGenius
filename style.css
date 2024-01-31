@@ -37,7 +37,7 @@ td.svelte-13hsdno.svelte-13hsdno.svelte-13hsdno {
     text-shadow: 0 0 0.1em rgb(212, 206, 253), 0 0 0.1em rgb(212, 206, 253),
         0 0 0.1em rgb(212, 206, 253);
     font-weight: 900;
-    letter-spacing: 0.5vw;
+    /* letter-spacing: 0.5vw; */
     display: flex !important;
     align-content: center !important;
     align-items: center !important;
