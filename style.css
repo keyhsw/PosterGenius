@@ -77,3 +77,14 @@ button.selected.svelte-kqij2n {
     background: #624AFF !important;
     color: white !important;
 }
+
+#qr_code {
+    max-height: 100px !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+#qr_code_info {
+    text-align: center;
+}
+
