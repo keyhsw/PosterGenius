@@ -1,3 +1,4 @@
 *.pyc*
 workdir/
 .DS_Store
+run.sh
