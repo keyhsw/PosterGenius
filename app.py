@@ -399,15 +399,24 @@ def main():
                                 inputs=[prompt_text_en],
                             )
 
-                # 钉钉群二维码信息
-                gr.HTML(f"""
-                        <div id=qr_code>
-                                <img id=qr_code  src='https://modelscope.cn/api/v1/studio/iic/PosterGenius/repo?Revision=master&FilePath=assets/qrcode_dd.png&View=true'>
-                        </div>
-                        <div id=qr_code_info>
-                            创意海报生成需求共建钉钉群
-                        </div>
-                """)
+                with gr.Row():
+                    # 钉钉群二维码信息
+                    gr.HTML(f"""
+                            <div id=qr_code>
+                                    <img id=qr_code  src='https://modelscope.cn/api/v1/studio/iic/PosterGenius/repo?Revision=master&FilePath=assets/qrcode_dd.jpg&View=true'>
+                            </div>
+                            <div id=qr_code_info>
+                                创意海报需求共建钉钉群
+                            </div>
+                    """)
+                    gr.HTML(f"""
+                            <div id=qr_code>
+                                    <img id=qr_code  src='https://modelscope.cn/api/v1/studio/iic/PosterGenius/repo?Revision=master&FilePath=assets/qrcode_wx.jpg&View=true'>
+                            </div>
+                            <div id=qr_code_info>
+                                创意海报需求共建微信群
+                            </div>
+                    """)
 
                 collection_explore_examples0.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
