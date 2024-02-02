@@ -88,3 +88,20 @@ button.selected.svelte-kqij2n {
     text-align: center;
 }
 
+img.svelte-1btp92j {
+    max-height: 200px !important;
+    height: 200px !important;
+    display: flex !important;
+    align-content: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.block.style_example_img.svelte-90oupt {
+    max-height: 200px !important;
+    height: 200px !important;
+    display: flex !important;
+    align-content: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
