@@ -109,12 +109,6 @@ style_image_mapping = {
 def return_style_info(selected_label, current_content):
     if selected_label != None:
         examples_dir = f"example/风格展示/{style_image_mapping[selected_label]}"
-        samples = []
-        for ff in os.listdir(examples_dir):
-            if ff.endswith(".jpeg"):
-                samples.append(ff)
-        random.shuffle(samples)
-        images = os.path.join(examples_dir,samples[0])
         selected_content = {prompt_mapping[selected_label]}
         current_set = set(current_content.split(", ")) if current_content else set()
         to_add = selected_content - current_set
@@ -125,7 +119,7 @@ def return_style_info(selected_label, current_content):
 
         updated_content = ", ".join(sorted(current_set))
 
-        return updated_content,images
+        return updated_content,examples_dir
     else:
         return None,None
 
