@@ -23,7 +23,7 @@ from core.log import logger
 import uuid, time
 
 results_cache_dir = "results_cache"
-examples_dir = ['example/春节', 'example/2D极简',  'example/3D卡通','example/刺绣风','example/水墨风','example/折纸工艺','example/真实场景','example/pick1']
+examples_dir = ['example/春节', 'example/2D极简',  'example/3D卡通','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景','example/pick1']
 random.seed(100)
 
 def shuffle_examples(examples_dir_idx=0):
@@ -36,7 +36,7 @@ def shuffle_examples(examples_dir_idx=0):
     return samples1
 
 
-def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template):
+def generate(title, sub_title, body_text, prompt_text_zh, style_prompt,prompt_text_en, text_template):
     if len(title) > TextLength.title:
         raise gr.Error(f"主标题最多支持{TextLength.title}个字符")
         return
@@ -56,6 +56,9 @@ def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_t
     if len(prompt_text_zh) == 0 and len(prompt_text_en) == 0:
         raise gr.Error("请填写用于生成图像的提示词，或者直接点击样例填充。")
         return
+    
+    if style_prompt != '':
+        prompt_text_zh = style_prompt + ", " + prompt_text_zh
 
     params = {
         "title": title,
@@ -83,6 +86,36 @@ def example_func(evt: gr.SelectData):
         # title, sub_title, body_text, prompt_text_zh, prompt_text_en
     return [info["title"], info["subtitle"], info["body"], info["prompt_zh"], info["prompt_en"],
             info["template"]]
+
+
+options_mapping = {
+    "中国水墨": "中国水墨画风格",
+    "中国刺绣": "中国刺绣风格",
+    "2D极简": "平面插图，2d风格，极简主义，几何形状",
+    "3D卡通": "3D卡通风格Q版风格",
+    "折纸工艺": "折纸工艺,paper craft stage",
+    "真实场景": "真实照片",
+    }
+
+def return_style_info(selected_label, current_content):
+    examples_dir = f"example/{selected_label}"
+    samples = []
+    for ff in os.listdir(examples_dir):
+        if ff.endswith(".jpeg"):
+            samples.append(ff)
+    random.shuffle(samples)
+    images = os.path.join(examples_dir,samples[0])
+    selected_content = {options_mapping[selected_label]}
+    current_set = set(current_content.split(", ")) if current_content else set()
+    to_add = selected_content - current_set
+    to_remove = current_set - selected_content
+
+    current_set |= to_add
+    current_set -= to_remove
+
+    updated_content = ", ".join(sorted(current_set))
+
+    return updated_content,images
 
 def main():
     block = gr.Blocks(
@@ -208,6 +241,16 @@ def main():
                                                         placeholder='一只乖巧可爱的十二生肖金龙，春节氛围，水墨风，3D风格',
                                                         lines=2,
                                                         elem_classes='prompt_text_zh')
+                            
+                            with gr.Row():
+                                styles = gr.Radio(label="生成风格选择",choices=list(options_mapping.keys()),value=list(options_mapping.keys())[0])
+                                style_example = gr.Image(label="风格示例",value = "example/中国水墨/2024-01-29-06-34-31_84d4afe8-7548-429e-bc0a-56af2a4d2dab.jpeg",image_mode='contain', width=112, height=200)
+                            
+
+
+                            style_prompt = gr.Textbox(label="风格", visible=False)
+                            styles.change(return_style_info,inputs=[styles,style_prompt],outputs=[style_prompt,style_example])
+
                             with gr.Accordion("高级选项", open=False, elem_id="accordion"):
                                 prompt_text_en = gr.Textbox(label='英文提示词（非必填）', placeholder='',
                                                             elem_classes='prompt_text_en')
@@ -500,7 +543,7 @@ def main():
 
 
 
-        btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template],
+        btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh,style_prompt, prompt_text_en, text_template],
                   outputs=[result_image])
         btn_ai_prompt.click(generate_text, inputs=[title], outputs=[sub_title, body_text])
 
