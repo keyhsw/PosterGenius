@@ -244,7 +244,7 @@ def main():
                             
                             with gr.Row():
                                 styles = gr.Radio(label="生成风格选择",choices=list(options_mapping.keys()),value=list(options_mapping.keys())[0])
-                                style_example = gr.Image(label="风格示例",value = "example/中国水墨/2024-01-29-06-34-31_84d4afe8-7548-429e-bc0a-56af2a4d2dab.jpeg",image_mode='contain', width=112, height=200)
+                                style_example = gr.Image(label="风格示例",value = "example/中国水墨/2024-01-29-06-34-31_84d4afe8-7548-429e-bc0a-56af2a4d2dab.jpeg", show_label=True, elem_classes="style_example_img", show_download_button=False)
                             
 
 
