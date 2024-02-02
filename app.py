@@ -59,7 +59,6 @@ def generate(title, sub_title, body_text, prompt_text_zh, style_prompt,prompt_te
     
     if style_prompt != '':
         prompt_text_zh = style_prompt + ", " + prompt_text_zh
-
     params = {
         "title": title,
         "sub_title": sub_title,
@@ -95,6 +94,7 @@ prompt_mapping = {
     "3D卡通": "3D卡通风格Q版风格",
     "折纸工艺": "折纸工艺,paper craft stage",
     "真实场景": "真实照片",
+    "不指定风格":None,
     }
 
 style_image_mapping = {
@@ -107,7 +107,7 @@ style_image_mapping = {
     }
 
 def return_style_info(selected_label, current_content):
-    if selected_label != None:
+    if selected_label != None and selected_label !="不指定风格":
         examples_dir = f"example/风格展示/{style_image_mapping[selected_label]}"
         selected_content = {prompt_mapping[selected_label]}
         current_set = set(current_content.split(", ")) if current_content else set()
