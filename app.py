@@ -83,7 +83,7 @@ def example_func(evt: gr.SelectData):
         # Print image details
         info = json.load(rfile)
         # title, sub_title, body_text, prompt_text_zh, prompt_text_en
-    gr.Info("参数已自动填充到创作页面")
+    gr.Info("已将配方发送到创作页面")
     return [info["title"], info["subtitle"], info["body"], info["prompt_zh"], info["prompt_en"],
             info["template"],None, gr.Tabs.update(selected=1)]
 
