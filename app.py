@@ -83,8 +83,9 @@ def example_func(evt: gr.SelectData):
         # Print image details
         info = json.load(rfile)
         # title, sub_title, body_text, prompt_text_zh, prompt_text_en
+    gr.Info("参数已自动填充到创作页面")
     return [info["title"], info["subtitle"], info["body"], info["prompt_zh"], info["prompt_en"],
-            info["template"],None]
+            info["template"],None, gr.Tabs.update(selected=1)]
 
 
 prompt_mapping = {
@@ -469,82 +470,82 @@ def main():
 
                 collection_explore_examples0.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ]) 
 
                 collection_explore_examples1.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ]) 
 
                 collection_explore_examples2.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 collection_explore_examples3.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 collection_explore_examples4.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 collection_explore_examples5.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 collection_explore_examples6.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 collection_explore_examples7.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 explore_examples0.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ]) 
 
                 explore_examples1.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ]) 
 
                 explore_examples2.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 explore_examples3.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 explore_examples4.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 explore_examples5.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 explore_examples6.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
                 explore_examples7.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ])
 
 
