@@ -73,7 +73,7 @@ def generate(title, sub_title, body_text, prompt_text_zh, style_prompt,prompt_te
     # requests
     all_result_imgs = process_poster_generation(params)
     logger.info("process done.")
-    return all_result_imgs
+    return all_result_imgs, ""
 
 
 def example_func(evt: gr.SelectData):
@@ -551,7 +551,7 @@ def main():
 
 
         btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh,style_prompt, prompt_text_en, text_template],
-                  outputs=[result_image])
+                  outputs=[result_image, text_template])
         btn_ai_prompt.click(generate_text, inputs=[title], outputs=[sub_title, body_text])
 
     logger.info("============ Launch Client ============")
