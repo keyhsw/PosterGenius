@@ -136,7 +136,7 @@ def create_example(label, idx):
         samples=[
             [os.path.join(examples_dir[idx], x)] for x in samples
         ],
-        samples_per_page=10,
+        samples_per_page=8,
         elem_id=f'{label}_{idx}',
         type='index', # pass index or value
     )
