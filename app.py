@@ -93,12 +93,12 @@ def example_func(evt: gr.SelectData):
 
 
 prompt_mapping = {
-    "中国水墨": "中国水墨画风格",
-    "中国刺绣": "中国刺绣风格",
     "2D极简": "平面插图，2d风格，极简主义，几何形状",
     "3D卡通": "3D卡通风格Q版风格",
+    "中国刺绣": "中国刺绣风格",
     "折纸工艺": "折纸工艺,paper craft stage",
     "真实场景": "真实照片",
+    "中国水墨": "中国水墨画风格",
     "不指定风格":None,
     }
 
@@ -176,7 +176,7 @@ def main():
                                                         elem_classes='prompt_text_zh')
                             
                             with gr.Row():
-                                styles = gr.Radio(label="生成风格选择",choices=list(prompt_mapping.keys()))
+                                styles = gr.Radio(label="生成风格选择（非必选）",choices=list(prompt_mapping.keys()))
                                 style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
                             
 
