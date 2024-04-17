@@ -23,17 +23,20 @@ from core.log import logger
 import uuid, time
 
 results_cache_dir = "results_cache"
-examples_dir = ['example/春节', 'example/2D极简',  'example/3D卡通','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景','example/pick1']
+examples_dir = ['example/pick2', 'example/春节', 'example/2D极简',  'example/3D卡通','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景']
+examples_dir_lables = ['近期更新', '春节', '2D极简',  '3D卡通','中国刺绣','中国水墨','折纸工艺','真实场景']
 random.seed(100)
 
 def shuffle_examples(examples_dir_idx=0):
     ## samples0
-    samples1 = []
+    samples = []
     for ff in os.listdir(examples_dir[examples_dir_idx]):
         if ff.endswith(".jpeg"):
-            samples1.append(ff)
-    random.shuffle(samples1)
-    return samples1
+            samples.append(ff)
+        if ff.endswith(".png"):
+            samples.append(ff)
+    random.shuffle(samples)
+    return samples
 
 
 def generate(title, sub_title, body_text, prompt_text_zh, style_prompt,prompt_text_en, text_template):
@@ -73,27 +76,29 @@ def generate(title, sub_title, body_text, prompt_text_zh, style_prompt,prompt_te
     # requests
     all_result_imgs = process_poster_generation(params)
     logger.info("process done.")
-    return all_result_imgs
+    return all_result_imgs, ""
 
 
 def example_func(evt: gr.SelectData):
     img_path = evt.value[0]
+    img_name = ".".join(img_path.split(".")[:-1])
     # Open an image file
-    with open(img_path.replace(".jpeg",".json")) as rfile:
+    with open( f"{img_name}.json") as rfile:
         # Print image details
         info = json.load(rfile)
         # title, sub_title, body_text, prompt_text_zh, prompt_text_en
+    gr.Info("已将配方发送到创作页面")
     return [info["title"], info["subtitle"], info["body"], info["prompt_zh"], info["prompt_en"],
-            info["template"],None]
+            info["template"],None, gr.Tabs.update(selected=1)]
 
 
 prompt_mapping = {
-    "中国水墨": "中国水墨画风格",
-    "中国刺绣": "中国刺绣风格",
     "2D极简": "平面插图，2d风格，极简主义，几何形状",
     "3D卡通": "3D卡通风格Q版风格",
+    "中国刺绣": "中国刺绣风格",
     "折纸工艺": "折纸工艺,paper craft stage",
     "真实场景": "真实照片",
+    "中国水墨": "中国水墨画风格",
     "不指定风格":None,
     }
 
@@ -123,6 +128,20 @@ def return_style_info(selected_label, current_content):
     else:
         return None,None
 
+def create_example(label, idx):
+    samples = shuffle_examples(examples_dir_idx=idx)
+    examples = gr.Dataset(
+        label=f'{label}  --  点击样例图，自动填充参数',
+        components=[gr.Image(visible=False)],
+        samples=[
+            [os.path.join(examples_dir[idx], x)] for x in samples
+        ],
+        samples_per_page=8,
+        elem_id=f'{label}_{idx}',
+        type='index', # pass index or value
+    )
+    return examples
+
 def main():
     block = gr.Blocks(
         css='style.css',
@@ -136,103 +155,11 @@ def main():
         with gr.Tabs() as tabs:
             collection_tab =gr.Tab(label="作品广场", elem_id='tab', id=0)
             with collection_tab:
-                samples = shuffle_examples(examples_dir_idx=0)
-                collection_explore_examples0 = gr.Dataset(
-                    label='春节元素  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[0], x)] for x in samples
-                    ],
-                    samples_per_page=12,
-                    elem_id='examples0',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=1)
-                collection_explore_examples1 = gr.Dataset(
-                    label='2D极简风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[1], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples1',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=3)
-                collection_explore_examples2 = gr.Dataset(
-                    label='中国刺绣风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[3], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples2',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=5)
-                collection_explore_examples3 = gr.Dataset(
-                    label='折纸工艺  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[5], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples3',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=4)
-                collection_explore_examples4 = gr.Dataset(
-                    label='中国水墨风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[4], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples4',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=2)
-                collection_explore_examples5 = gr.Dataset(
-                    label='3D卡通风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[2], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples5',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=6)
-                collection_explore_examples6 = gr.Dataset(
-                    label='真实场景  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[6], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples6',
-                    type='index', # pass index or value
-                )
-
-                ## samples2
-                samples = shuffle_examples(examples_dir_idx=7)
-                collection_explore_examples7 = gr.Dataset(
-                    label='其它风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[7], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples7',
-                    type='index', # pass index or value
-                )
-
+                collection_explore_examples = []
+                for idx, label in enumerate(examples_dir):
+                    label = examples_dir_lables[idx]
+                    exps = create_example(label, idx)
+                    collection_explore_examples.append(exps)
 
             creation_tab =gr.Tab(label="创作海报", elem_id='tab', id=1)
             with creation_tab:
@@ -249,7 +176,7 @@ def main():
                                                         elem_classes='prompt_text_zh')
                             
                             with gr.Row():
-                                styles = gr.Radio(label="生成风格选择",choices=list(prompt_mapping.keys()))
+                                styles = gr.Radio(label="生成风格选择（非必选）",choices=list(prompt_mapping.keys()))
                                 style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
                             
 
@@ -278,102 +205,6 @@ def main():
                                 label='preview', show_label=True, elem_classes="preview_imgs", preview=True, interactive=False)
 
 
-                samples = shuffle_examples(examples_dir_idx=0)
-                explore_examples0 = gr.Dataset(
-                    label='春节元素  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[0], x)] for x in samples
-                    ],
-                    samples_per_page=12,
-                    elem_id='examples0',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=1)
-                explore_examples1 = gr.Dataset(
-                    label='2D极简风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[1], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples1',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=3)
-                explore_examples2 = gr.Dataset(
-                    label='中国刺绣风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[3], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples2',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=5)
-                explore_examples3 = gr.Dataset(
-                    label='折纸工艺  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[5], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples3',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=4)
-                explore_examples4 = gr.Dataset(
-                    label='中国水墨风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[4], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples4',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=2)
-                explore_examples5 = gr.Dataset(
-                    label='3D卡通风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[2], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples5',
-                    type='index', # pass index or value
-                )
-
-                samples = shuffle_examples(examples_dir_idx=6)
-                explore_examples6 = gr.Dataset(
-                    label='3D卡通风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[6], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples6',
-                    type='index', # pass index or value
-                )
-
-                ## samples2
-                samples = shuffle_examples(examples_dir_idx=7)
-                explore_examples7 = gr.Dataset(
-                    label='其它风格  --  点击样例图，自动填充参数',
-                    components=[gr.Image(visible=False)],
-                    samples=[
-                        [os.path.join(examples_dir[7], x)] for x in samples
-                    ],
-                    samples_per_page=8,
-                    elem_id='examples7',
-                    type='index', # pass index or value
-                )
 
                 with gr.Row():
                     gr.Examples(
@@ -467,90 +298,16 @@ def main():
                             </div>
                     """)
 
-                collection_explore_examples0.select(fn=example_func, outputs=[
+            for exps in collection_explore_examples:
+                exps.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
+                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
                 ]) 
-
-                collection_explore_examples1.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ]) 
-
-                collection_explore_examples2.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                collection_explore_examples3.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                collection_explore_examples4.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                collection_explore_examples5.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                collection_explore_examples6.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                collection_explore_examples7.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                explore_examples0.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ]) 
-
-                explore_examples1.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ]) 
-
-                explore_examples2.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                explore_examples3.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                explore_examples4.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                explore_examples5.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                explore_examples6.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
-
-                explore_examples7.select(fn=example_func, outputs=[
-                    title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles
-                ])
 
 
 
         btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh,style_prompt, prompt_text_en, text_template],
-                  outputs=[result_image])
+                  outputs=[result_image, text_template])
         btn_ai_prompt.click(generate_text, inputs=[title], outputs=[sub_title, body_text])
 
     logger.info("============ Launch Client ============")
