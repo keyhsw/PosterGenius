@@ -97,7 +97,7 @@ def example_func(evt: gr.SelectData):
     if lora_name == "不指定" and label_name in lora_mapping.keys():
         lora_name = label_name
     lora_weight = info.get("lora_weight",0.5)
-    ctrl_ratio = info.get("ctrl_ratio",0.8)
+    ctrl_ratio = info.get("ctrl_ratio",0.7)
     ctrl_step = info.get("ctrl_step",0.7)
     wh_ratios = info.get("wh_ratios","竖版")
     return [info["title"], info["subtitle"], info["body"], info["prompt_zh"], info["prompt_en"],
