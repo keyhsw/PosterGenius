@@ -88,6 +88,11 @@ class GeneratePoster:
         prompt_text_zh = args.get("prompt_text_zh")
         prompt_text_en = args.get("prompt_text_en")
         text_template = args.get("text_template") 
+        wh_ratios = args.get("wh_ratios") 
+        lora_name = args.get("lora_name") 
+        lora_weight = args.get("lora_weight") 
+        ctrl_ratio = args.get("ctrl_ratio") 
+        ctrl_step = args.get("ctrl_step") 
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -104,7 +109,12 @@ class GeneratePoster:
                     "body_text": body,
                     "prompt_text_zh":prompt_text_zh,
                     "prompt_text_en": prompt_text_en,
-                    "text_template":text_template
+                    "text_template":text_template,
+                    "wh_ratios":wh_ratios,
+                    "lora_name":lora_name,
+                    "lora_weight":lora_weight,
+                    "ctrl_ratio":ctrl_ratio,
+                    "ctrl_step":ctrl_step,
                 },
                 "parameters": {
                 }
@@ -129,6 +139,55 @@ class GeneratePoster:
         logger.info(f"request_id: {request_id}: download generated general poster images.")
         img_data = download_images(result_image_urls, len(result_image_urls))
         logger.info(f"request_id: {request_id}: Generate general poster done.")
+        return img_data
+    
+    def request_local(self, args):
+        title = args.get("title")
+        sub_title = args.get("sub_title")
+        body = args.get("body")
+        prompt_text_zh = args.get("prompt_text_zh")
+        prompt_text_en = args.get("prompt_text_en")
+        text_template = args.get("text_template") 
+        wh_ratios = args.get("wh_ratios") 
+        lora_name = args.get("lora_name") 
+        lora_weight = args.get("lora_weight") 
+        ctrl_ratio = args.get("ctrl_ratio") 
+        ctrl_step = args.get("ctrl_step") 
+        body = {
+            "header" : {
+            "request_id":"9B49478D-DB34-5B92-BB6C-5F666653D053",
+            "service_id":"3862b8df",
+            "task_id":"9B49478D-DB34-5B92-BB6C-5F666653D053",
+            "attributes":{
+            "user_id": "1234567890"
+                }
+            },
+            "payload" : {
+                "input":{
+                    "title": title,
+                    "sub_title": sub_title,
+                    "body_text": body,
+                    "prompt_text_zh":prompt_text_zh,
+                    "prompt_text_en": prompt_text_en,
+                    "text_template":text_template,
+                    "wh_ratios":wh_ratios,
+                    "lora_name":lora_name,
+                    "lora_weight":lora_weight,
+                    "ctrl_ratio":ctrl_ratio,
+                    "ctrl_step":ctrl_step,
+                },
+                "parameters": {
+                }
+            }
+        }
+        response = requests.post('http://127.0.0.1:8090/api/predict/service_name', headers={}, json=body).json()
+
+        #outputs = response["payload"]["output"]["image_urls"]
+        outputs = response
+        result_image_urls = outputs['payload']['output']['render_urls']
+
+        # Download result images
+        img_data = download_images(result_image_urls, len(result_image_urls))
         return img_data
 
 

@@ -23,8 +23,8 @@ from core.log import logger
 import uuid, time
 
 results_cache_dir = "results_cache"
-examples_dir = ['example/pick2', 'example/春节', 'example/2D极简',  'example/3D卡通','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景']
-examples_dir_lables = ['近期更新', '春节', '2D极简',  '3D卡通','中国刺绣','中国水墨','折纸工艺','真实场景']
+examples_dir = ['example/pick4','example/pick3','example/pick2', 'example/春节', 'example/2D插画3',  'example/3D卡通1','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景']
+examples_dir_lables = ['近期更新--横版','近期更新--竖版','节气海报', '春节', '2D插画3',  '3D卡通1','中国刺绣','中国水墨','折纸工艺','真实场景']
 random.seed(100)
 
 def shuffle_examples(examples_dir_idx=0):
@@ -39,7 +39,7 @@ def shuffle_examples(examples_dir_idx=0):
     return samples
 
 
-def generate(title, sub_title, body_text, prompt_text_zh, style_prompt,prompt_text_en, text_template):
+def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template,wh_ratios,lora_name,lora_weight,ctrl_ratio,ctrl_step):
     if len(title) > TextLength.title:
         raise gr.Error(f"主标题最多支持{TextLength.title}个字符")
         return
@@ -59,16 +59,18 @@ def generate(title, sub_title, body_text, prompt_text_zh, style_prompt,prompt_te
     if len(prompt_text_zh) == 0 and len(prompt_text_en) == 0:
         raise gr.Error("请填写用于生成图像的提示词，或者直接点击样例填充。")
         return
-    
-    if style_prompt != '':
-        prompt_text_zh = style_prompt + ", " + prompt_text_zh
     params = {
         "title": title,
         "sub_title": sub_title,
         "body": body_text,
         "prompt_text_zh": prompt_text_zh,
         "prompt_text_en": prompt_text_en,
-        "text_template": text_template
+        "text_template": text_template,
+        "wh_ratios":wh_ratios,
+        "lora_name":lora_mapping[lora_name],
+        "lora_weight":lora_weight,
+        "ctrl_ratio":ctrl_ratio,
+        "ctrl_step":ctrl_step,
     }
 
     logger.info(f"input params: {params}")
@@ -81,62 +83,95 @@ def generate(title, sub_title, body_text, prompt_text_zh, style_prompt,prompt_te
 
 def example_func(evt: gr.SelectData):
     img_path = evt.value[0]
-    img_name = ".".join(img_path.split(".")[:-1])
+    json_name = img_path.replace(".render.png",".json")
+    json_name = json_name.replace(".png",".json")
+    json_name = json_name.replace(".jpeg",".json")
+    label_name = img_path.split('/')[-2]
     # Open an image file
-    with open( f"{img_name}.json") as rfile:
+    with open(json_name) as rfile:
         # Print image details
         info = json.load(rfile)
         # title, sub_title, body_text, prompt_text_zh, prompt_text_en
     gr.Info("已将配方发送到创作页面")
+    lora_name = info.get("lora_name","不指定")
+    if lora_name == "不指定" and label_name in lora_mapping.keys():
+        lora_name = label_name
+    lora_weight = info.get("lora_weight",0.5)
+    ctrl_ratio = info.get("ctrl_ratio",0.8)
+    ctrl_step = info.get("ctrl_step",0.7)
+    wh_ratios = info.get("wh_ratios","竖版")
     return [info["title"], info["subtitle"], info["body"], info["prompt_zh"], info["prompt_en"],
-            info["template"],None, gr.Tabs.update(selected=1)]
+            info["template"],lora_name,float(lora_weight),float(ctrl_ratio),float(ctrl_step),wh_ratios, gr.Tabs.update(selected=1)]
 
 
-prompt_mapping = {
-    "2D极简": "平面插图，2d风格，极简主义，几何形状",
-    "3D卡通": "3D卡通风格Q版风格",
-    "中国刺绣": "中国刺绣风格",
-    "折纸工艺": "折纸工艺,paper craft stage",
-    "真实场景": "真实照片",
-    "中国水墨": "中国水墨画风格",
-    "不指定风格":None,
+lora_mapping = {
+    "2D插画1":"2D插画1",
+    "2D插画2":"2D插画2",
+    "2D插画3":"2D极简",
+    "3D卡通1":"3D卡通1",
+    #"3D卡通2":"3D卡通2",
+    "浩瀚星云":"浩瀚星云",
+    "浓郁色彩":"浓郁色彩",
+    "光线粒子":"光线粒子",
+    "透明玻璃":"透明玻璃",
+    #"简约线条":"简约线条",
+    #"几何方块":"几何方块",
+    "剪纸工艺":"剪纸工艺",
+    "折纸工艺":"折纸工艺",
+    "中国水墨":"中国水墨",
+    "中国刺绣":"中国刺绣",
+    "真实场景":"真实场景",
+    "复古油画":"复古油画",
+    "不指定":"",
     }
+
 
 style_image_mapping = {
-    "中国水墨": "shuimo.png",
-    "中国刺绣": "cixiu.png",
-    "2D极简": "2D.png",
-    "3D卡通": "3D.png",
-    "折纸工艺": "zhezhi.png",
-    "真实场景": "zhenshi.png",
+    "3D卡通1":"3D.jpg",
+    #"3D卡通2":"3D.jpg",
+    "浩瀚星云":"xingyun.jpg",
+    "浓郁色彩":"secai.jpg",
+    "复古油画":"youhua.jpg",
+    "剪纸工艺":"jianzhi.jpg",
+    "折纸工艺":"zhezhi.jpg",
+    "光线粒子":"guangxian.jpg",
+    "透明玻璃":"boli.jpg",
+    "2D插画1":"2D1.jpg",
+    "2D插画2":"2D2.jpg",
+    "2D插画3":"2D3.jpg",
+    #"简约线条":"cixiu.jpg",
+    #"几何方块":"cixiu.jpg",
+    "中国水墨":"shuimo.jpg",
+    "中国刺绣":"cixiu.jpg",
+    "真实场景":"zhenshi.jpg",
+    "不指定":None,
     }
 
-def return_style_info(selected_label, current_content):
-    if selected_label != None and selected_label !="不指定风格":
+def return_style_exsample(selected_label):
+    if selected_label !="不指定":
         examples_dir = f"example/风格展示/{style_image_mapping[selected_label]}"
-        selected_content = {prompt_mapping[selected_label]}
-        current_set = set(current_content.split(", ")) if current_content else set()
-        to_add = selected_content - current_set
-        to_remove = current_set - selected_content
 
-        current_set |= to_add
-        current_set -= to_remove
-
-        updated_content = ", ".join(sorted(current_set))
-
-        return updated_content,examples_dir
+        return examples_dir
     else:
-        return None,None
+        return None
+
+def erasure_template():
+    return ""
+
 
 def create_example(label, idx):
     samples = shuffle_examples(examples_dir_idx=idx)
+    if "近期更新--竖版" in label:
+        show_num = 12
+    else:
+        show_num = 6
     examples = gr.Dataset(
         label=f'{label}  --  点击样例图，自动填充参数',
         components=[gr.Image(visible=False)],
         samples=[
             [os.path.join(examples_dir[idx], x)] for x in samples
         ],
-        samples_per_page=8,
+        samples_per_page=show_num,
         elem_id=f'{label}_{idx}',
         type='index', # pass index or value
     )
@@ -176,21 +211,23 @@ def main():
                                                         elem_classes='prompt_text_zh')
                             
                             with gr.Row():
-                                styles = gr.Radio(label="生成风格选择（非必选）",choices=list(prompt_mapping.keys()))
-                                style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
+                                styles = gr.Radio(label="生成风格选择（非必选）",choices=list(lora_mapping.keys()))
+                                with gr.Column():
+                                    style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
+                                    wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版"],value="横版")
                             
 
-
-                            style_prompt = gr.Textbox(label="风格", visible=False)
-                            styles.change(return_style_info,inputs=[styles,style_prompt],outputs=[style_prompt,style_example])
+                            
+                            styles.change(return_style_exsample,inputs=[styles],outputs=[style_example])
 
                             with gr.Accordion("高级选项", open=False, elem_id="accordion"):
                                 prompt_text_en = gr.Textbox(label='英文提示词（非必填）', placeholder='',
                                                             elem_classes='prompt_text_en')
                                 text_template = gr.Textbox(label='', placeholder='', visible=False, elem_classes='text_template')
-                                ctrl_ratio = gr.Slider(label="图像留白强度", minimum=0, maximum=1, value=0.7)
-                                ctrl_step = gr.Slider(label="图像留白步数", minimum=0, maximum=1, value=0.7)
-
+                                lora_weight = gr.Slider(minimum=0.3, maximum=0.8, step=0.05, value=0.8, label="Lora权重选择",interactive=True)
+                                ctrl_ratio = gr.Slider(label="图像留白强度", minimum=0.3, maximum=0.8,step=0.05, value=0.7)
+                                ctrl_step = gr.Slider(label="图像留白步数", minimum=0.3, maximum=0.8, step=0.05,value=0.7)
+                            wh_ratios.change(erasure_template,outputs=[text_template])
                             with gr.Column():
                                 with gr.Row():
                                     btn_ai_prompt = gr.Button(value="AI生成文案", elem_classes='btn_ai_prompt')
@@ -301,12 +338,12 @@ def main():
             for exps in collection_explore_examples:
                 exps.select(fn=example_func, outputs=[
                     title, sub_title, body_text,
-                    prompt_text_zh, prompt_text_en, text_template,styles, tabs
+                    prompt_text_zh, prompt_text_en, text_template,styles,lora_weight,ctrl_ratio,ctrl_step,wh_ratios, tabs
                 ]) 
 
 
 
-        btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh,style_prompt, prompt_text_en, text_template],
+        btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template,wh_ratios,styles,lora_weight,ctrl_ratio,ctrl_step],
                   outputs=[result_image, text_template])
         btn_ai_prompt.click(generate_text, inputs=[title], outputs=[sub_title, body_text])
 
