@@ -224,9 +224,9 @@ def main():
                                 prompt_text_en = gr.Textbox(label='英文提示词（非必填）', placeholder='',
                                                             elem_classes='prompt_text_en')
                                 text_template = gr.Textbox(label='', placeholder='', visible=False, elem_classes='text_template')
-                                lora_weight = gr.Slider(minimum=0.3, maximum=0.8, step=0.05, value=0.8, label="Lora权重选择",interactive=True)
-                                ctrl_ratio = gr.Slider(label="图像留白强度", minimum=0.3, maximum=0.8,step=0.05, value=0.7)
-                                ctrl_step = gr.Slider(label="图像留白步数", minimum=0.3, maximum=0.8, step=0.05,value=0.7)
+                                lora_weight = gr.Slider(minimum=0.3, maximum=0.8, step=0.05, value=0.8, label="风格权重选择（权重越大，风格越明显）",interactive=True)
+                                ctrl_ratio = gr.Slider(label="图像留白强度（留白强度越高，留白效果越好，但对背景生成效果可能有负面影响）", minimum=0.3, maximum=0.8,step=0.05, value=0.7)
+                                ctrl_step = gr.Slider(label="图像留白步数（留白步数越高，留白效果越好，但对背景生成效果可能有负面影响）", minimum=0.3, maximum=0.8, step=0.05,value=0.7)
                             wh_ratios.change(erasure_template,outputs=[text_template])
                             with gr.Column():
                                 with gr.Row():
