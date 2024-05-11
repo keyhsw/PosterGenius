@@ -23,5 +23,5 @@ def generate_text(title):
 
 def process_poster_generation(args):
     genetor = GeneratePoster()
-    img_lists = genetor.request(args)
-    return img_lists
+    img_lists,bg_image_urls,render_params = genetor.request_local(args)
+    return img_lists,bg_image_urls,render_params

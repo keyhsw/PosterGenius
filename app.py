@@ -71,16 +71,57 @@ def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_t
         "lora_weight":lora_weight,
         "ctrl_ratio":ctrl_ratio,
         "ctrl_step":ctrl_step,
+        "sr_flag":False,
+        "bg_image_urls":"",
+        "render_params":"",
     }
 
     logger.info(f"input params: {params}")
 
     # requests
-    all_result_imgs = process_poster_generation(params)
+    all_result_imgs,bg_image_urls,render_params = process_poster_generation(params)
+    logger.info("process done.")
+    bg_image_urls.append("")
+    render_params.append("")
+    return all_result_imgs, "",bg_image_urls,render_params
+
+def generate_sr(bg_image_urls,render_params):
+    if bg_image_urls == None or render_params == None:
+        raise gr.Error(f"请先生成再进行分辨率提升")
+        return
+    if bg_image_urls[4] == "" or render_params[4] == "":
+        raise gr.Error(f"请选中一张图片再进行分辨率提升")
+        return
+    params = {
+        "title": "",
+        "sub_title": "",
+        "body": "",
+        "prompt_text_zh": "",
+        "prompt_text_en": "",
+        "text_template": "",
+        "wh_ratios":"",
+        "lora_name":"",
+        "lora_weight":"",
+        "ctrl_ratio":"",
+        "ctrl_step":"",
+        "sr_flag":True,
+        "bg_image_urls":bg_image_urls[4],
+        "render_params":render_params[4],
+
+    }
+
+    logger.info(f"input params: {params}")
+
+    # requests
+    all_result_imgs,_,_ = process_poster_generation(params)
     logger.info("process done.")
     return all_result_imgs, ""
 
-
+def update_state(evt: gr.SelectData,urls,reder_paras):
+    index = evt.index
+    urls[4] = urls[index]
+    reder_paras[4] = reder_paras[index]
+    return urls,reder_paras
 def example_func(evt: gr.SelectData):
     img_path = evt.value[0]
     json_name = img_path.replace(".render.png",".json")
@@ -211,7 +252,7 @@ def main():
                                                         elem_classes='prompt_text_zh')
                             
                             with gr.Row():
-                                styles = gr.Radio(label="生成风格选择（非必选）",choices=list(lora_mapping.keys()))
+                                styles = gr.Radio(label="生成风格选择（非必选）",choices=list(lora_mapping.keys()),value = "不指定")
                                 with gr.Column():
                                     style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
                                     wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版"],value="横版")
@@ -238,8 +279,14 @@ def main():
 
                         with gr.Column():
                             # result = gr.HTML(label='preview', show_label=True, elem_classes='preview_html')
+                            bg_image_urls = gr.State()
+                            render_params = gr.State()
                             result_image = gr.Gallery(
                                 label='preview', show_label=True, elem_classes="preview_imgs", preview=True, interactive=False)
+                            btn_sr = gr.Button(value="提升结果分辨率", elem_classes='btn_sr')
+                            result_image.select(fn=update_state,inputs=[bg_image_urls,render_params],outputs=[bg_image_urls,render_params])
+                            result_sr_image = gr.Gallery(
+                                label='高分辨率结果', show_label=True, elem_classes="preview_sr_imgs", preview=True, interactive=False)
 
 
 
@@ -344,8 +391,9 @@ def main():
 
 
         btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template,wh_ratios,styles,lora_weight,ctrl_ratio,ctrl_step],
-                  outputs=[result_image, text_template])
+                  outputs=[result_image, text_template,bg_image_urls,render_params])
         btn_ai_prompt.click(generate_text, inputs=[title], outputs=[sub_title, body_text])
+        btn_sr.click(generate_sr,inputs=[bg_image_urls,render_params],outputs=[result_sr_image, text_template])
 
     logger.info("============ Launch Client ============")
     block.launch(server_name=socket.gethostbyname(socket.gethostname()) if os.getenv('SERVER_IP') else '127.0.0.1',

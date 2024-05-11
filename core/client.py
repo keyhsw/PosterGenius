@@ -64,6 +64,8 @@ class GeneratePoster:
                 if "SUCCEEDED" == res['output']['task_status']:
                     logger.info(f"task_id: {task_id}: general poster generation task query success.")
                     img_urls = res['output']['render_urls']
+                    bg_image_urls = res['output']['image_urls']
+                    render_params = res['output']['render_params']
                     # img_urls = [x['url'] for x in img_urls]
                     logger.info(f'task_id: {task_id}: task result: {res_.content.decode("utf-8")}')
                     break
@@ -79,7 +81,7 @@ class GeneratePoster:
                 logger.error(f'task_id: {task_id}: Fail to query task result: {res_.content} httpcode:{respose_code}')
                 raise gr.Error("Fail to query task result.")
 
-        return (img_urls, task_id)
+        return (img_urls,bg_image_urls,render_params, task_id)
 
     def request(self, args):
         title = args.get("title")
@@ -92,7 +94,10 @@ class GeneratePoster:
         lora_name = args.get("lora_name") 
         lora_weight = args.get("lora_weight") 
         ctrl_ratio = args.get("ctrl_ratio") 
-        ctrl_step = args.get("ctrl_step") 
+        ctrl_step = args.get("ctrl_step")
+        sr_flag = args.get("sr_flag")  
+        bg_image_urls = args.get("bg_image_urls")  
+        render_params = args.get("render_params")  
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -115,6 +120,9 @@ class GeneratePoster:
                     "lora_weight":lora_weight,
                     "ctrl_ratio":ctrl_ratio,
                     "ctrl_step":ctrl_step,
+                    "sr_flag":sr_flag,
+                    "bg_image_urls":bg_image_urls,
+                    "render_params":render_params,
                 },
                 "parameters": {
                 }
@@ -133,13 +141,14 @@ class GeneratePoster:
             raise gr.Error("Fail to create general poster task.")
 
         # Query task results
-        result_image_urls = self.query_result(task_id, headers)[0]
+        result_image_urls,result_bg_image_urls,result_render_params = self.query_result(task_id, headers)
+        
 
         # Download result images
         logger.info(f"request_id: {request_id}: download generated general poster images.")
         img_data = download_images(result_image_urls, len(result_image_urls))
         logger.info(f"request_id: {request_id}: Generate general poster done.")
-        return img_data
+        return img_data,result_bg_image_urls,result_render_params
     
     def request_local(self, args):
         title = args.get("title")
@@ -153,6 +162,9 @@ class GeneratePoster:
         lora_weight = args.get("lora_weight") 
         ctrl_ratio = args.get("ctrl_ratio") 
         ctrl_step = args.get("ctrl_step") 
+        sr_flag = args.get("sr_flag")  
+        bg_image_urls = args.get("bg_image_urls")  
+        render_params = args.get("render_params")  
         body = {
             "header" : {
             "request_id":"9B49478D-DB34-5B92-BB6C-5F666653D053",
@@ -175,6 +187,9 @@ class GeneratePoster:
                     "lora_weight":lora_weight,
                     "ctrl_ratio":ctrl_ratio,
                     "ctrl_step":ctrl_step,
+                    "sr_flag":sr_flag,
+                    "bg_image_urls":bg_image_urls,
+                    "render_params":render_params,
                 },
                 "parameters": {
                 }
@@ -185,10 +200,12 @@ class GeneratePoster:
         #outputs = response["payload"]["output"]["image_urls"]
         outputs = response
         result_image_urls = outputs['payload']['output']['render_urls']
+        result_bg_image_urls = outputs['payload']['output']['image_urls']
+        result_render_params = outputs['payload']['output']['render_params']
 
         # Download result images
         img_data = download_images(result_image_urls, len(result_image_urls))
-        return img_data
+        return img_data,result_bg_image_urls,result_render_params
 
 
 class GeneratePromptQwen:
