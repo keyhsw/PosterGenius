@@ -51,7 +51,29 @@ td.svelte-13hsdno.svelte-13hsdno.svelte-13hsdno {
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5) !important;
 }
 
+
+.btn_ai_prompt_gen {
+    background-color: #624AFF !important;
+    color: #FFFFFF !important;
+    border-radius: 2px !important;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5) !important;
+}
+
 .btn_gen {
+    background-color: #624AFF !important;
+    color: #FFFFFF !important;
+    border-radius: 2px !important;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.btn_sr {
+    background-color: #624AFF !important;
+    color: #FFFFFF !important;
+    border-radius: 2px !important;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.btn_set {
     background-color: #624AFF !important;
     color: #FFFFFF !important;
     border-radius: 2px !important;
