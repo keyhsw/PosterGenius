@@ -141,14 +141,14 @@ class GeneratePoster:
             raise gr.Error("Fail to create general poster task.")
 
         # Query task results
-        result_image_urls,result_bg_image_urls,result_render_params = self.query_result(task_id, headers)
+        result_image_urls,result_bg_image_urls,result_render_params,_ = self.query_result(task_id, headers)
         
 
         # Download result images
         logger.info(f"request_id: {request_id}: download generated general poster images.")
         img_data = download_images(result_image_urls, len(result_image_urls))
         logger.info(f"request_id: {request_id}: Generate general poster done.")
-        return img_data,result_bg_image_urls,result_render_params
+        return img_data,result_bg_image_urls,result_render_params,result_image_urls
     
     def request_local(self, args):
         title = args.get("title")
@@ -205,7 +205,7 @@ class GeneratePoster:
 
         # Download result images
         img_data = download_images(result_image_urls, len(result_image_urls))
-        return img_data,result_bg_image_urls,result_render_params
+        return img_data,result_bg_image_urls,result_render_params,result_image_urls
 
 
 class GeneratePromptQwen:

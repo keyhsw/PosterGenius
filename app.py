@@ -8,7 +8,8 @@ import numpy as np
 import os, sys, copy
 
 from core.const import TextLength
-from core.core import generate_text, process_poster_generation
+from core.core import generate_text, process_poster_generation,generate_prompt
+from core.client import download_images
 
 sys.path.insert(0, './')
 
@@ -23,8 +24,8 @@ from core.log import logger
 import uuid, time
 
 results_cache_dir = "results_cache"
-examples_dir = ['example/pick4','example/pick3','example/pick2', 'example/春节', 'example/2D插画3','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景']
-examples_dir_lables = ['近期更新--横版','近期更新--竖版','节气海报', '春节', '2D插画3', '中国刺绣','中国水墨','折纸工艺','真实场景']
+examples_dir = ['example/pick5','example/pick4','example/pick3','example/pick2', 'example/春节', 'example/2D插画3','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景']
+examples_dir_lables = ['近期更新--套图','近期更新--横版','近期更新--竖版','节气海报', '春节', '2D插画3', '中国刺绣','中国水墨','折纸工艺','真实场景']
 random.seed(100)
 
 def shuffle_examples(examples_dir_idx=0):
@@ -79,17 +80,17 @@ def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_t
     logger.info(f"input params: {params}")
 
     # requests
-    all_result_imgs,bg_image_urls,render_params = process_poster_generation(params)
+    all_result_imgs,bg_image_urls,render_params,img_urls = process_poster_generation(params)
     logger.info("process done.")
     bg_image_urls.append("")
     render_params.append("")
-    return all_result_imgs, "",bg_image_urls,render_params
+    return all_result_imgs, "",bg_image_urls,render_params,img_urls
 
 def generate_sr(bg_image_urls,render_params):
     if bg_image_urls == None or render_params == None:
         raise gr.Error(f"请先生成再进行分辨率提升")
         return
-    if bg_image_urls[4] == "" or render_params[4] == "":
+    if bg_image_urls[-1] == "" or render_params[-1] == "":
         raise gr.Error(f"请选中一张图片再进行分辨率提升")
         return
     params = {
@@ -105,22 +106,45 @@ def generate_sr(bg_image_urls,render_params):
         "ctrl_ratio":"",
         "ctrl_step":"",
         "sr_flag":True,
-        "bg_image_urls":bg_image_urls[4],
-        "render_params":render_params[4],
+        "bg_image_urls":bg_image_urls[-1],
+        "render_params":render_params[-1],
 
     }
 
     logger.info(f"input params: {params}")
 
     # requests
-    all_result_imgs,_,_ = process_poster_generation(params)
+    all_result_imgs,_,_,_= process_poster_generation(params)
     logger.info("process done.")
+
     return all_result_imgs, ""
+
+
+def generate_set(img_urls):
+    if img_urls == None or len(img_urls) != 6:
+        raise gr.Error(f"请先生成套图再拼接")
+        return
+    all_result_imgs = []
+    all_result_imgs = download_images(img_urls, len(img_urls))
+
+    w1 = all_result_imgs[0].width
+    w2 = all_result_imgs[0].height
+    w3 = all_result_imgs[2].width
+    w_set = w1*2 + w3*2 + 50*3 + 20*2
+    h_set = w1*2 + w2 + 50*2 + 20*2
+    set_image = np.uint8(np.ones((h_set,w_set,3))*255)
+    set_image[20+w1+50:20+w1+50+w2,20:20+w1] = np.array(all_result_imgs[0])
+    set_image[20+w1+50:20+w1+50+w2,20+w1+50+w3+50:20+w1+50+w3+50+w1] = np.array(all_result_imgs[1])
+    set_image[20+w1+50:20+w1+50+w2,20+w1+50:20+w1+50+w3] = np.array(all_result_imgs[2])
+    set_image[20+w1+50:20+w1+50+w2,20+w1+50+w3+50+w1+50:20+w1+50+w3+50+w1+50+w3] = np.array(all_result_imgs[3])
+    set_image[20:20+w1,20+ w1+50:20+ w1+50+w3] = np.array(all_result_imgs[4])
+    set_image[20+w1+50+w2+50:20+w1+50+w2+50+w1,20+ w1+50:20+ w1+50+w3] = np.array(all_result_imgs[5])
+    return [Image.fromarray(set_image)]
 
 def update_state(evt: gr.SelectData,urls,reder_paras):
     index = evt.index
-    urls[4] = urls[index]
-    reder_paras[4] = reder_paras[index]
+    urls[-1] = urls[index]
+    reder_paras[-1] = reder_paras[index]
     return urls,reder_paras
 def example_func(evt: gr.SelectData):
     img_path = evt.value[0]
@@ -163,6 +187,18 @@ lora_mapping = {
     "中国刺绣":"中国刺绣",
     "真实场景":"真实场景",
     "复古油画":"复古油画",
+    #"未来科技":"未来科技",
+    #"潦草线条":"潦草线条",
+    "2D卡通":"2D卡通",
+    #"国风水彩":"国风水彩",
+    #"唯美梦境":"唯美梦境",
+    "儿童水彩":"儿童水彩",
+    "赛博背景":"赛博背景",
+    #"镭射城市":"镭射城市",
+    "浅蓝抽象":"浅蓝抽象",
+    "深蓝抽象":"深蓝抽象",
+    "抽象点线":"抽象点线",
+    "童话油画":"童话油画",
     "不指定":"",
     }
 
@@ -182,6 +218,18 @@ style_image_mapping = {
     "2D插画3":"2D3.jpg",
     #"简约线条":"cixiu.jpg",
     #"几何方块":"cixiu.jpg",
+    #"未来科技":"2D1.jpg",
+    #"潦草线条":"2D1.jpg",
+    "2D卡通":"2Dkatong.jpg",
+    #"国风水彩":"2D1.jpg",
+    #"唯美梦境":"2D1.jpg",
+    "儿童水彩":"ertong.jpg",
+    "赛博背景":"saibo.jpg",
+    #"镭射城市":"2D1.jpg",
+    "浅蓝抽象":"qianlan.jpg",
+    "深蓝抽象":"shenlan.jpg",
+    "抽象点线":"dianxian.jpg",
+    "童话油画":"tonghua.jpg",
     "中国水墨":"shuimo.jpg",
     "中国刺绣":"cixiu.jpg",
     "真实场景":"zhenshi.jpg",
@@ -250,12 +298,12 @@ def main():
                                                         placeholder='一只乖巧可爱的十二生肖金龙，春节氛围，水墨风，3D风格',
                                                         lines=2,
                                                         elem_classes='prompt_text_zh')
-                            
+                            btn_ai_prompt_gen = gr.Button(value="AI扩展提示词", elem_classes='btn_ai_prompt_gen')
                             with gr.Row():
                                 styles = gr.Radio(label="生成风格选择（非必选）",choices=list(lora_mapping.keys()),value = "不指定")
                                 with gr.Column():
                                     style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
-                                    wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版"],value="横版")
+                                    wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版","套图"],value="横版")
                             
 
                             
@@ -281,12 +329,19 @@ def main():
                             # result = gr.HTML(label='preview', show_label=True, elem_classes='preview_html')
                             bg_image_urls = gr.State()
                             render_params = gr.State()
+                            image_urls = gr.State()
                             result_image = gr.Gallery(
                                 label='preview', show_label=True, elem_classes="preview_imgs", preview=True, interactive=False)
-                            btn_sr = gr.Button(value="提升结果分辨率", elem_classes='btn_sr')
-                            result_image.select(fn=update_state,inputs=[bg_image_urls,render_params],outputs=[bg_image_urls,render_params])
-                            result_sr_image = gr.Gallery(
-                                label='高分辨率结果', show_label=True, elem_classes="preview_sr_imgs", preview=True, interactive=False)
+                            with gr.Row():
+                                with gr.Column():
+                                    btn_sr = gr.Button(value="提升结果分辨率", elem_classes='btn_sr')
+                                    result_image.select(fn=update_state,inputs=[bg_image_urls,render_params],outputs=[bg_image_urls,render_params])
+                                    result_sr_image = gr.Gallery(
+                                        label='高分辨率结果', show_label=True, elem_classes="preview_sr_imgs", preview=True, interactive=False)
+                                with gr.Column():
+                                    btn_set = gr.Button(value="拼接套图", elem_classes='btn_set')
+                                    result_set_image = gr.Gallery(
+                                        label='套图拼接', show_label=True, elem_classes="preview_set_imgs", preview=True, interactive=False)
 
 
 
@@ -391,9 +446,11 @@ def main():
 
 
         btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template,wh_ratios,styles,lora_weight,ctrl_ratio,ctrl_step],
-                  outputs=[result_image, text_template,bg_image_urls,render_params])
+                  outputs=[result_image, text_template,bg_image_urls,render_params,image_urls])
         btn_ai_prompt.click(generate_text, inputs=[title], outputs=[sub_title, body_text])
+        btn_ai_prompt_gen.click(generate_prompt,inputs=[prompt_text_zh], outputs=[prompt_text_zh])
         btn_sr.click(generate_sr,inputs=[bg_image_urls,render_params],outputs=[result_sr_image, text_template])
+        btn_set.click(generate_set,inputs=[image_urls],outputs=[result_set_image])
 
     logger.info("============ Launch Client ============")
     block.launch(server_name=socket.gethostbyname(socket.gethostname()) if os.getenv('SERVER_IP') else '127.0.0.1',
