@@ -303,7 +303,7 @@ def main():
                                 styles = gr.Radio(label="生成风格选择（非必选）",choices=list(lora_mapping.keys()),value = "不指定")
                                 with gr.Column():
                                     style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
-                                    wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版","套图"],value="横版")
+                                    wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版"],value="横版")
                             
 
                             
