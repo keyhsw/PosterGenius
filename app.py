@@ -339,9 +339,9 @@ def main():
                                     result_sr_image = gr.Gallery(
                                         label='高分辨率结果', show_label=True, elem_classes="preview_sr_imgs", preview=True, interactive=False)
                                 with gr.Column():
-                                    btn_set = gr.Button(value="拼接套图", elem_classes='btn_set')
+                                    btn_set = gr.Button(value="拼接套图", elem_classes='btn_set',visible=False)
                                     result_set_image = gr.Gallery(
-                                        label='套图拼接', show_label=True, elem_classes="preview_set_imgs", preview=True, interactive=False)
+                                        label='套图拼接', show_label=True, elem_classes="preview_set_imgs", preview=True, interactive=False,visible=False)
 
 
 
