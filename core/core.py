@@ -32,5 +32,5 @@ def generate_prompt(prompt_input):
 
 def process_poster_generation(args):
     genetor = GeneratePoster()
-    img_lists,bg_image_urls,render_params,result_image_urls = genetor.request(args)
+    img_lists,bg_image_urls,render_params,result_image_urls = genetor.request_local(args)
     return img_lists,bg_image_urls,render_params,result_image_urls
