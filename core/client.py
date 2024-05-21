@@ -9,12 +9,14 @@ import gradio as gr
 import concurrent.futures
 from PIL import Image
 import io
-
+from core.upload_util import DOWNLOAD_OSS_TOOL,UPLOAD_OSS_TOOL
+import time
+import cv2
 
 from core.log import logger
 
 APP_AUTH_GENERAL_POSTER = os.getenv('APP_AUTH_GENERAL_POSTER')
-
+results_cache_dir = "results_cache_dashscope/user_input_images"
 
 def download_img_pil(index, img_url):
     # print(img_url)
@@ -97,7 +99,35 @@ class GeneratePoster:
         ctrl_step = args.get("ctrl_step")
         sr_flag = args.get("sr_flag")  
         bg_image_urls = args.get("bg_image_urls")  
-        render_params = args.get("render_params")  
+        render_params = args.get("render_params")
+        user_mask = args.get("user_mask")
+        image_prompt = args.get("image_prompt")
+        image_prompt_weight = args.get("image_prompt_weight")
+        if user_mask is not None or image_prompt is not None:
+            day_str = f"{time.strftime('%Y-%m-%d', time.localtime())}"
+            time_str = f"{time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())}"
+            if user_mask is not None:
+                os.makedirs(f"{results_cache_dir}/user_mask/{day_str}", exist_ok=True)
+                save_name = f"{results_cache_dir}/user_mask/{day_str}/{time_str}"
+                cv2.imwrite(save_name + "_user_mask.png", user_mask)
+                DOWNLOAD_OSS_TOOL.upload_file(save_name + "_user_mask.png", f"jianguo.wjg/通用海报专项/{save_name}_user_mask.png")
+                user_mask_url = UPLOAD_OSS_TOOL.sign_url(f"jianguo.wjg/通用海报专项/{save_name}_user_mask.png")
+                #os.system(f"rm -f {save_name}_user_mask.png")
+            else:
+                user_mask_url = ""
+            if image_prompt is not None:
+                os.makedirs(f"{results_cache_dir}/image_prompt/{day_str}", exist_ok=True)
+                save_name = f"{results_cache_dir}/image_prompt/{day_str}/{time_str}"
+                cv2.imwrite(save_name + "_image_prompt.png", image_prompt[:,:,::-1])
+                DOWNLOAD_OSS_TOOL.upload_file(save_name + "_image_prompt.png", f"jianguo.wjg/通用海报专项/{save_name}_image_prompt.png")
+                image_prompt_url = UPLOAD_OSS_TOOL.sign_url(f"jianguo.wjg/通用海报专项/{save_name}_image_prompt.png")
+                #os.system(f"rm -f {save_name}_image_prompt.png")
+            else:
+                image_prompt_url = ""
+        else:
+            user_mask_url = ""
+            image_prompt_url = ""
+            
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -123,6 +153,9 @@ class GeneratePoster:
                     "sr_flag":sr_flag,
                     "bg_image_urls":bg_image_urls,
                     "render_params":render_params,
+                    "user_mask":user_mask_url, 
+                    "image_prompt":image_prompt_url,
+                    "image_prompt_weight":image_prompt_weight,
                 },
                 "parameters": {
                 }
@@ -167,7 +200,31 @@ class GeneratePoster:
         render_params = args.get("render_params")
         user_mask = args.get("user_mask")
         image_prompt = args.get("image_prompt")
-        image_prompt_weight = args.get("image_prompt_weight")  
+        image_prompt_weight = args.get("image_prompt_weight") 
+        if user_mask is not None or image_prompt is not None:
+            day_str = f"{time.strftime('%Y-%m-%d', time.localtime())}"
+            time_str = f"{time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime())}"
+            if user_mask is not None:
+                os.makedirs(f"{results_cache_dir}/user_mask/{day_str}", exist_ok=True)
+                save_name = f"{results_cache_dir}/user_mask/{day_str}/{time_str}"
+                cv2.imwrite(save_name + "_user_mask.png", user_mask)
+                DOWNLOAD_OSS_TOOL.upload_file(save_name + "_user_mask.png", f"jianguo.wjg/通用海报专项/{save_name}_user_mask.png")
+                user_mask_url = UPLOAD_OSS_TOOL.sign_url(f"jianguo.wjg/通用海报专项/{save_name}_user_mask.png")
+                #os.system(f"rm -f {save_name}_user_mask.png")
+            else:
+                user_mask_url = ""
+            if image_prompt is not None:
+                os.makedirs(f"{results_cache_dir}/image_prompt/{day_str}", exist_ok=True)
+                save_name = f"{results_cache_dir}/image_prompt/{day_str}/{time_str}"
+                cv2.imwrite(save_name + "_image_prompt.png", image_prompt[:,:,::-1])
+                DOWNLOAD_OSS_TOOL.upload_file(save_name + "_image_prompt.png", f"jianguo.wjg/通用海报专项/{save_name}_image_prompt.png")
+                image_prompt_url = UPLOAD_OSS_TOOL.sign_url(f"jianguo.wjg/通用海报专项/{save_name}_image_prompt.png")
+                #os.system(f"rm -f {save_name}_image_prompt.png")
+            else:
+                image_prompt_url = ""
+        else:
+            user_mask_url = ""
+            image_prompt_url = "" 
         body = {
             "header" : {
             "request_id":"9B49478D-DB34-5B92-BB6C-5F666653D053",
@@ -193,8 +250,8 @@ class GeneratePoster:
                     "sr_flag":sr_flag,
                     "bg_image_urls":bg_image_urls,
                     "render_params":render_params,
-                    "user_mask":user_mask, 
-                    "image_prompt":image_prompt,
+                    "user_mask":user_mask_url, 
+                    "image_prompt":image_prompt_url,
                     "image_prompt_weight":image_prompt_weight,
                 },
                 "parameters": {
