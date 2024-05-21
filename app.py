@@ -24,8 +24,8 @@ from core.log import logger
 import uuid, time
 
 results_cache_dir = "results_cache"
-examples_dir = ['example/pick4','example/pick3','example/pick2', 'example/春节', 'example/2D插画3','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景']
-examples_dir_lables = ['近期更新--横版','近期更新--竖版','节气海报', '春节', '2D插画3', '中国刺绣','中国水墨','折纸工艺','真实场景']
+examples_dir = ['example/pick5','example/pick4','example/pick3','example/pick2', 'example/春节', 'example/2D插画3','example/中国刺绣','example/中国水墨','example/折纸工艺','example/真实场景']
+examples_dir_lables = ['近期更新--套图','近期更新--横版','近期更新--竖版','节气海报', '春节', '2D插画3', '中国刺绣','中国水墨','折纸工艺','真实场景']
 random.seed(100)
 
 def shuffle_examples(examples_dir_idx=0):
@@ -40,7 +40,7 @@ def shuffle_examples(examples_dir_idx=0):
     return samples
 
 
-def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template,wh_ratios,lora_name,lora_weight,ctrl_ratio,ctrl_step):
+def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template,wh_ratios,lora_name,lora_weight,ctrl_ratio,ctrl_step,mask,image_prompt,image_prompt_weight):
     if len(title) > TextLength.title:
         raise gr.Error(f"主标题最多支持{TextLength.title}个字符")
         return
@@ -57,9 +57,15 @@ def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_t
         raise gr.Error("主标题不能为空")
         return
 
-    if len(prompt_text_zh) == 0 and len(prompt_text_en) == 0:
+    if len(prompt_text_zh) == 0 and len(prompt_text_en) == 0 and image_prompt is None:
         raise gr.Error("请填写用于生成图像的提示词，或者直接点击样例填充。")
         return
+    if wh_ratios == "套图":
+        text_template = ""
+    if mask is not None:
+        user_mask = mask["mask"]
+    else:
+        user_mask = None
     params = {
         "title": title,
         "sub_title": sub_title,
@@ -75,6 +81,9 @@ def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_t
         "sr_flag":False,
         "bg_image_urls":"",
         "render_params":"",
+        "user_mask":user_mask, 
+        "image_prompt":image_prompt,
+        "image_prompt_weight":image_prompt_weight,
     }
 
     logger.info(f"input params: {params}")
@@ -84,6 +93,7 @@ def generate(title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_t
     logger.info("process done.")
     bg_image_urls.append("")
     render_params.append("")
+    test =100
     return all_result_imgs, "",bg_image_urls,render_params,img_urls
 
 def generate_sr(bg_image_urls,render_params):
@@ -125,8 +135,7 @@ def generate_set(img_urls):
         raise gr.Error(f"请先生成套图再拼接")
         return
     all_result_imgs = []
-    all_result_imgs = download_images(img_urls, len(img_urls))
-
+    imgs = download_images(img_urls, len(img_urls))
     w1 = all_result_imgs[0].width
     w2 = all_result_imgs[0].height
     w3 = all_result_imgs[2].width
@@ -140,6 +149,12 @@ def generate_set(img_urls):
     set_image[20:20+w1,20+ w1+50:20+ w1+50+w3] = np.array(all_result_imgs[4])
     set_image[20+w1+50+w2+50:20+w1+50+w2+50+w1,20+ w1+50:20+ w1+50+w3] = np.array(all_result_imgs[5])
     return [Image.fromarray(set_image)]
+
+def mask_click(image_mask):
+    mask = image_mask["mask"]
+    image = image_mask["image"]
+    result = cv2.bitwise_or(mask,image)
+    return result
 
 def update_state(evt: gr.SelectData,urls,reder_paras):
     index = evt.index
@@ -303,7 +318,13 @@ def main():
                                 styles = gr.Radio(label="生成风格选择（非必选）",choices=list(lora_mapping.keys()),value = "不指定")
                                 with gr.Column():
                                     style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
-                                    wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版"],value="横版")
+                                    wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版","套图"],value="横版")
+                                    modify_mask = gr.ImageMask(label="上传模版", show_label=True, elem_classes="mask_img", show_download_button=False)
+                                    generate_mask = gr.Image(label="Mask", show_label=True, elem_classes="mask_example", show_download_button=False)
+                                    btn_mask = gr.Button(value="显示mask", elem_classes='btn_ai_prompt')
+                                    image_prompt = gr.inputs.Image(label="上传控制图片")
+                                    image_prompt_weight = gr.Slider(minimum=0.1, maximum=1.0, step=0.05, value=0.8, label="图片控制权重",interactive=True)
+                            btn_mask.click(fn=mask_click,inputs=[modify_mask],outputs=[generate_mask])
                             
 
                             
@@ -313,9 +334,9 @@ def main():
                                 prompt_text_en = gr.Textbox(label='英文提示词（非必填）', placeholder='',
                                                             elem_classes='prompt_text_en')
                                 text_template = gr.Textbox(label='', placeholder='', visible=False, elem_classes='text_template')
-                                lora_weight = gr.Slider(minimum=0.3, maximum=0.8, step=0.05, value=0.8, label="风格权重选择（权重越大，风格越明显）",interactive=True)
-                                ctrl_ratio = gr.Slider(label="图像留白强度（留白强度越高，留白效果越好，但对背景生成效果可能有负面影响）", minimum=0.3, maximum=0.8,step=0.05, value=0.7)
-                                ctrl_step = gr.Slider(label="图像留白步数（留白步数越高，留白效果越好，但对背景生成效果可能有负面影响）", minimum=0.3, maximum=0.8, step=0.05,value=0.7)
+                                lora_weight = gr.Slider(minimum=0.3, maximum=1.0, step=0.05, value=0.8, label="风格权重选择（权重越大，风格越明显）",interactive=True)
+                                ctrl_ratio = gr.Slider(label="图像留白强度（留白强度越高，留白效果越好，但对背景生成效果可能有负面影响）", minimum=0.3, maximum=1.0,step=0.05, value=0.7)
+                                ctrl_step = gr.Slider(label="图像留白步数（留白步数越高，留白效果越好，但对背景生成效果可能有负面影响）", minimum=0.3, maximum=1.0, step=0.05,value=0.7)
                             wh_ratios.change(erasure_template,outputs=[text_template])
                             with gr.Column():
                                 with gr.Row():
@@ -339,9 +360,9 @@ def main():
                                     result_sr_image = gr.Gallery(
                                         label='高分辨率结果', show_label=True, elem_classes="preview_sr_imgs", preview=True, interactive=False)
                                 with gr.Column():
-                                    btn_set = gr.Button(value="拼接套图", elem_classes='btn_set',visible=False)
+                                    btn_set = gr.Button(value="拼接套图", elem_classes='btn_set')
                                     result_set_image = gr.Gallery(
-                                        label='套图拼接', show_label=True, elem_classes="preview_set_imgs", preview=True, interactive=False,visible=False)
+                                        label='套图拼接', show_label=True, elem_classes="preview_set_imgs", preview=True, interactive=False)
 
 
 
@@ -445,7 +466,7 @@ def main():
 
 
 
-        btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template,wh_ratios,styles,lora_weight,ctrl_ratio,ctrl_step],
+        btn.click(generate, inputs=[title, sub_title, body_text, prompt_text_zh, prompt_text_en, text_template,wh_ratios,styles,lora_weight,ctrl_ratio,ctrl_step,modify_mask,image_prompt,image_prompt_weight],
                   outputs=[result_image, text_template,bg_image_urls,render_params,image_urls])
         btn_ai_prompt.click(generate_text, inputs=[title], outputs=[sub_title, body_text])
         btn_ai_prompt_gen.click(generate_prompt,inputs=[prompt_text_zh], outputs=[prompt_text_zh])

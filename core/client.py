@@ -164,7 +164,10 @@ class GeneratePoster:
         ctrl_step = args.get("ctrl_step") 
         sr_flag = args.get("sr_flag")  
         bg_image_urls = args.get("bg_image_urls")  
-        render_params = args.get("render_params")  
+        render_params = args.get("render_params")
+        user_mask = args.get("user_mask")
+        image_prompt = args.get("image_prompt")
+        image_prompt_weight = args.get("image_prompt_weight")  
         body = {
             "header" : {
             "request_id":"9B49478D-DB34-5B92-BB6C-5F666653D053",
@@ -190,6 +193,9 @@ class GeneratePoster:
                     "sr_flag":sr_flag,
                     "bg_image_urls":bg_image_urls,
                     "render_params":render_params,
+                    "user_mask":user_mask, 
+                    "image_prompt":image_prompt,
+                    "image_prompt_weight":image_prompt_weight,
                 },
                 "parameters": {
                 }
@@ -202,8 +208,8 @@ class GeneratePoster:
         result_image_urls = outputs['payload']['output']['render_urls']
         result_bg_image_urls = outputs['payload']['output']['image_urls']
         result_render_params = outputs['payload']['output']['render_params']
-
         # Download result images
+        test = 100
         img_data = download_images(result_image_urls, len(result_image_urls))
         return img_data,result_bg_image_urls,result_render_params,result_image_urls
 
