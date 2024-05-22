@@ -320,11 +320,11 @@ def main():
                                     style_example = gr.Image(label="风格示例", show_label=True, elem_classes="style_example_img", show_download_button=False)
                                     wh_ratios = gr.Radio(label="宽高比选择",choices=["横版","竖版","套图"],value="横版")
                                     modify_mask = gr.ImageMask(label="上传模版", show_label=True, elem_classes="mask_img", show_download_button=False)
-                                    generate_mask = gr.Image(label="Mask", show_label=True, elem_classes="mask_example", show_download_button=False)
-                                    btn_mask = gr.Button(value="显示mask", elem_classes='btn_ai_prompt')
+                                    # generate_mask = gr.Image(label="Mask", show_label=True, elem_classes="mask_example", show_download_button=False)
+                                    # btn_mask = gr.Button(value="显示mask", elem_classes='btn_ai_prompt')
                                     image_prompt = gr.inputs.Image(label="上传控制图片")
                                     image_prompt_weight = gr.Slider(minimum=0.1, maximum=1.0, step=0.05, value=0.8, label="图片控制权重",interactive=True)
-                            btn_mask.click(fn=mask_click,inputs=[modify_mask],outputs=[generate_mask])
+                            # btn_mask.click(fn=mask_click,inputs=[modify_mask],outputs=[generate_mask])
                             
 
                             
