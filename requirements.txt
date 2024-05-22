@@ -1,2 +1,4 @@
 gradio==3.47.1
 dashscope
+opencv-python
+modelscope
