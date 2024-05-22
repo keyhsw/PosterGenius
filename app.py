@@ -24,8 +24,9 @@ from core.log import logger
 import uuid, time
 
 results_cache_dir = "results_cache"
-examples_dir = ['/home/xlab-app-center/example/pick3','/home/xlab-app-center/example/pick4','/home/xlab-app-center/example/pick2', '/home/xlab-app-center/example/春节','/home/xlab-app-center/example/中国刺绣','/home/xlab-app-center/example/中国水墨','/home/xlab-app-center/example/折纸工艺']
-examples_dir_lables = ['近期更新--竖版','近期更新--横版','节气海报', '春节', '中国刺绣','中国水墨','折纸工艺']
+# examples_dir = ['/home/xlab-app-center/example/pick3','/home/xlab-app-center/example/pick4','/home/xlab-app-center/example/pick2', '/home/xlab-app-center/example/春节','/home/xlab-app-center/example/中国刺绣','/home/xlab-app-center/example/中国水墨','/home/xlab-app-center/example/折纸工艺']
+examples_dir = ['/home/xlab-app-center/example/pick3','/home/xlab-app-center/example/pick4','/home/xlab-app-center/example/pick2']
+examples_dir_lables = ['近期更新--竖版','近期更新--横版']
 random.seed(100)
 
 def shuffle_examples(examples_dir_idx=0):
