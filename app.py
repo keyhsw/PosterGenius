@@ -24,7 +24,7 @@ from core.log import logger
 import uuid, time
 
 results_cache_dir = "results_cache"
-examples_dir = ['example/pick3','example/pick4','example/pick2', 'example/春节','example/中国刺绣','example/中国水墨','example/折纸工艺']
+examples_dir = ['./example/pick3','./example/pick4','./example/pick2', './example/春节','./example/中国刺绣','./example/中国水墨','./example/折纸工艺']
 examples_dir_lables = ['近期更新--竖版','近期更新--横版','节气海报', '春节', '中国刺绣','中国水墨','折纸工艺']
 random.seed(100)
 
